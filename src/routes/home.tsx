@@ -4,9 +4,9 @@ import { auth } from "../utils/firebase"
 export const Home = () => {
   const navigate = useNavigate()
 
-  const onClickLogout = () => {
+  const onClickLogout = async () => {
     try {
-      auth.signOut()
+      await auth.signOut()
       navigate("/login")
     } catch (err) {
       console.error(err)
