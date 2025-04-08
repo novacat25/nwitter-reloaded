@@ -1,14 +1,14 @@
-import { GithubAuthProvider, signInWithPopup } from "firebase/auth"
+import { FacebookAuthProvider, signInWithPopup } from "firebase/auth"
 import { auth } from "../utils/firebase"
 import { useNavigate } from "react-router-dom"
 import { Button, Logo } from "./social-auth-components"
 
 
-export const GitHubButton = () => {
+export const FacebookButton = () => {
   const navigate = useNavigate()
   const onClick = async () => {
     try {
-      const provider = new GithubAuthProvider()
+      const provider = new FacebookAuthProvider()
       await signInWithPopup(auth, provider)
       navigate("/")
     } catch (err) {
@@ -18,8 +18,8 @@ export const GitHubButton = () => {
 
   return (
     <Button onClick={onClick}>
-        <Logo src="/github-logo.svg" />
-        Continue With GitHub
+        <Logo src="/facebook-logo.png" />
+        Continue With Facebook
     </Button>
   )
 }
