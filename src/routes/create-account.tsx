@@ -3,7 +3,8 @@ import styled from "styled-components"
 import { INPUT_TYPE_NAME, INPUT_TYPE_EMAIL, INPUT_TYPE_PASSWORD } from "../constants"
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth"
 import { auth } from "../utils/firebase"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
+import { FirebaseError } from "@firebase/util"
 
 const Wrapper = styled.section`
   height: 100%;
@@ -16,6 +17,7 @@ const Wrapper = styled.section`
 
 const Form = styled.form`
   margin-top: 50px;
+  margin-bottom: 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -41,9 +43,16 @@ const Title = styled.h1`
 `
 
 const Error = styled.span`
-   font-weight: 600;
-   color: #ed4848;
+  font-weight: 600;
+  color: #ed4848;
  `
+
+ const Switcher = styled.span`
+  margin-top: 20px;
+  a {
+    color: #1d9bf0;
+  }
+`
 
 export const CreateAccount = () => {
   const navigate = useNavigate()
@@ -75,12 +84,14 @@ export const CreateAccount = () => {
     if(isLoading || !name || !email || !password) return
     try {
       setIsLoading(true)
+      setError("")
       const credentials = await createUserWithEmailAndPassword(auth, email, password)
-      console.log(credentials.user)
       await updateProfile(credentials.user, { displayName: name })
       navigate("/")
-    } catch (e) {
-      //setError
+    } catch (err) {
+      if(err instanceof FirebaseError) {
+        setError(err.message)
+      }
     } finally {
       setIsLoading(false)
     }
@@ -120,6 +131,9 @@ export const CreateAccount = () => {
         />
       </Form>
       {error !== "" ? <Error>{error}</Error> : null}
+      <Switcher>
+        Already have an account? <Link to="/login">Login →</Link>
+      </Switcher>      
     </Wrapper>
   )
 }
