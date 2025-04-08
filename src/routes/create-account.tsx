@@ -1,6 +1,9 @@
 import { useState } from "react"
 import styled from "styled-components"
-import { INPUT_TYPE_EMAIL, INPUT_TYPE_PASSWORD, INPUT_TYPE_USER } from "../constants"
+import { INPUT_TYPE_NAME, INPUT_TYPE_EMAIL, INPUT_TYPE_PASSWORD } from "../constants"
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth"
+import { auth } from "../utils/firebase"
+import { useNavigate } from "react-router-dom"
 
 const Wrapper = styled.section`
   height: 100%;
@@ -43,6 +46,7 @@ const Error = styled.span`
  `
 
 export const CreateAccount = () => {
+  const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false)
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
@@ -54,7 +58,7 @@ export const CreateAccount = () => {
       target: { name, value },
     } = e
     switch (name) {
-      case INPUT_TYPE_USER:
+      case INPUT_TYPE_NAME:
         setName(value)
         break
       case INPUT_TYPE_EMAIL:
@@ -66,12 +70,15 @@ export const CreateAccount = () => {
     }
   }
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    if(isLoading || !name || !email || !password) return
     try {
-      //Create an account
-      //Set the name of the user.
-      //Redirect to the home page.
+      setIsLoading(true)
+      const credentials = await createUserWithEmailAndPassword(auth, email, password)
+      console.log(credentials.user)
+      await updateProfile(credentials.user, { displayName: name })
+      navigate("/")
     } catch (e) {
       //setError
     } finally {
@@ -81,7 +88,7 @@ export const CreateAccount = () => {
 
   return (
     <Wrapper>
-      <Title>Log into 𝕏</Title>
+      <Title>Join 𝕏</Title>
       <Form onSubmit={onSubmit}>
         <Input
           name="name"
