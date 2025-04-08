@@ -1,5 +1,6 @@
 import { useState } from "react"
 import styled from "styled-components"
+import { INPUT_TYPE_EMAIL, INPUT_TYPE_PASSWORD, INPUT_TYPE_USER } from "../constants"
 
 const Wrapper = styled.section`
   height: 100%;
@@ -53,13 +54,13 @@ export const CreateAccount = () => {
       target: { name, value },
     } = e
     switch (name) {
-      case "name":
+      case INPUT_TYPE_USER:
         setName(value)
         break
-      case "email":
+      case INPUT_TYPE_EMAIL:
         setEmail(value)
         break
-      case "password":
+      case INPUT_TYPE_PASSWORD:
         setPassword(value)
         break
     }
