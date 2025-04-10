@@ -1,3 +1,10 @@
+import styled from "styled-components"
+import { PostTweetForm } from "../components/post-tweet-form"
+
+const Wrapper = styled.section``
+
 export const Home = () => {
-  return <h1>Home</h1>
+  return <Wrapper>
+  <PostTweetForm />
+  </Wrapper>
 }
