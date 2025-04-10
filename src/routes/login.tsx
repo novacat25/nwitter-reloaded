@@ -1,5 +1,4 @@
 import { useState } from "react"
-import { INPUT_TYPE_EMAIL, INPUT_TYPE_PASSWORD } from "../constants"
 import { auth } from "../utils/firebase"
 import { Link, useNavigate } from "react-router-dom"
 import { FirebaseError } from "@firebase/util"
@@ -11,31 +10,32 @@ import { FacebookButton } from "../components/facebook-button"
 export const Login = () => {
   const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+
+  const initialState = {
+    email: "",
+    password: "",
+  }
+  
+  const [formData, setFormData] = useState(initialState)
   const [error, setError] = useState("")
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const {
       target: { name, value },
     } = e
-    switch (name) {
-      case INPUT_TYPE_EMAIL:
-        setEmail(value)
-        break
-      case INPUT_TYPE_PASSWORD:
-        setPassword(value)
-        break
-    }
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: value,
+    }))
   }
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if(isLoading || !email || !password) return
+    if(isLoading || !formData.email || !formData.password) return
     try {
       setIsLoading(true)
       setError("")
-      await signInWithEmailAndPassword(auth, email, password)
+      await signInWithEmailAndPassword(auth, formData.email, formData.password)
       navigate("/")
     } catch (err) {
       if(err instanceof FirebaseError) {
@@ -52,7 +52,7 @@ export const Login = () => {
       <Form onSubmit={onSubmit}>
         <Input
           name="email"
-          value={email}
+          value={formData.email}
           placeholder="Email"
           onChange={onChange}
           type="email"
@@ -60,7 +60,7 @@ export const Login = () => {
         />
         <Input
           name="password"
-          value={password}
+          value={formData.password}
           placeholder="Password"
           onChange={onChange}
           type="password"

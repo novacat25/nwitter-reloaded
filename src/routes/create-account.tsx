@@ -1,5 +1,4 @@
 import { useState } from "react"
-import { INPUT_TYPE_NAME, INPUT_TYPE_EMAIL, INPUT_TYPE_PASSWORD } from "../constants"
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth"
 import { auth } from "../utils/firebase"
 import { Link, useNavigate } from "react-router-dom"
@@ -11,36 +10,35 @@ import { FacebookButton } from "../components/facebook-button"
 export const CreateAccount = () => {
   const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false)
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+
+  const initialState = {
+    name: "",
+    email: "",
+    password: "",
+  }
+
+  const [formData, setFormData] = useState(initialState)
+
   const [error, setError] = useState("")
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const {
       target: { name, value },
     } = e
-    switch (name) {
-      case INPUT_TYPE_NAME:
-        setName(value)
-        break
-      case INPUT_TYPE_EMAIL:
-        setEmail(value)
-        break
-      case INPUT_TYPE_PASSWORD:
-        setPassword(value)
-        break
-    }
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: value,
+    }))
   }
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if(isLoading || !name || !email || !password) return
+    if(isLoading || !formData.name || !formData.email || !formData.password) return
     try {
       setIsLoading(true)
       setError("")
-      const credentials = await createUserWithEmailAndPassword(auth, email, password)
-      await updateProfile(credentials.user, { displayName: name })
+      const credentials = await createUserWithEmailAndPassword(auth, formData.email, formData.password)
+      await updateProfile(credentials.user, { displayName: formData.name })
       navigate("/")
     } catch (err) {
       if(err instanceof FirebaseError) {
@@ -57,7 +55,7 @@ export const CreateAccount = () => {
       <Form onSubmit={onSubmit}>
         <Input
           name="name"
-          value={name}
+          value={formData.name}
           placeholder="Name"
           onChange={onChange}
           type="text"
@@ -65,7 +63,7 @@ export const CreateAccount = () => {
         />
         <Input
           name="email"
-          value={email}
+          value={formData.email}
           placeholder="Email"
           onChange={onChange}
           type="email"
@@ -73,7 +71,7 @@ export const CreateAccount = () => {
         />
         <Input
           name="password"
-          value={password}
+          value={formData.password}
           placeholder="Password"
           onChange={onChange}
           type="password"
