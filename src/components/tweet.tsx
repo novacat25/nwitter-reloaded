@@ -5,7 +5,7 @@ const Wrapper = styled.article`
     display: grid;
     grid-template-columns: 3fr 1fr;
     padding: 20px;
-    margin: 24px 0;
+    margin: 8px 0;
     border: 1px solid rgba(255, 255, 255, 0.8);
     border-radius: 15px;
 `
@@ -33,12 +33,9 @@ export const Tweet = ({ username, photo, tweet }: ITweet) => {
             <Username>{username}</Username>
             <Payload>{tweet}</Payload>
         </Column>
-        {photo && (
-            <Column>
-                <Photo src={photo} />
-            </Column>
-            )
-        }
+        <Column>
+        {photo && <Photo src={photo} />}
+        </Column>
     </Wrapper>
   )
 }
