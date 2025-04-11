@@ -2,7 +2,7 @@ import { addDoc, collection, updateDoc } from "firebase/firestore"
 import { useState } from "react"
 import styled from "styled-components"
 import { auth, db, storage } from "../utils/firebase"
-import { DB_COLLECTION_PATH, DEFAULT_NICKNAME, FILE_SIZE_LIMIT } from "../constants"
+import { DB_COLLECTION_PATH, DEFAULT_NICKNAME, FILE_SIZE_LIMIT, TWEET_MAX_LENGTH } from "../constants"
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage"
 
 const Form = styled.form`
@@ -65,7 +65,7 @@ export const PostTweetForm = () => {
         e.preventDefault()
         const user = auth.currentUser
 
-        if(!user || isLoading || !tweet || tweet.length > 200) return
+        if(!user || isLoading || !tweet || tweet.length > TWEET_MAX_LENGTH) return
 
         try {
             setIsLoading(true)
@@ -116,7 +116,7 @@ export const PostTweetForm = () => {
     <Form onSubmit={onSubmit}>
         <TextArea 
             rows={5}
-            maxLength={200}
+            maxLength={TWEET_MAX_LENGTH}
             value={tweet}
             onChange={onChange}
             placeholder="What is happening?"
