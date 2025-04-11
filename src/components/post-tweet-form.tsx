@@ -1,8 +1,9 @@
-import { addDoc, collection } from "firebase/firestore"
+import { addDoc, collection, updateDoc } from "firebase/firestore"
 import { useState } from "react"
 import styled from "styled-components"
-import { auth, db } from "../utils/firebase"
-import { DB_COLLECTION_PATH, DEFAULT_NICKNAME } from "../constants"
+import { auth, db, storage } from "../utils/firebase"
+import { DB_COLLECTION_PATH, DEFAULT_NICKNAME, FILE_SIZE_LIMIT } from "../constants"
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage"
 
 const Form = styled.form`
 display: flex;
@@ -75,7 +76,16 @@ export const PostTweetForm = () => {
                 userId: user.uid
             }
 
-            await addDoc(collection(db, DB_COLLECTION_PATH), tweetObj)
+            const tweetDoc = await addDoc(collection(db, DB_COLLECTION_PATH), tweetObj)
+
+            if (file) {
+                const locationRef = ref(storage, `${DB_COLLECTION_PATH}/${user.uid}-${user.displayName}/${tweetDoc.id}`)
+                const uploadResult = await uploadBytes(locationRef, file)
+                const downloadURL = await getDownloadURL(uploadResult.ref)
+                const updatePhotoPayload = { photo: downloadURL }
+                await updateDoc(tweetDoc, updatePhotoPayload)
+                setFile(null)
+            }
             setTweet("")
         } catch (err) {
             console.error(err)
@@ -91,7 +101,14 @@ export const PostTweetForm = () => {
     const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { files } = e?.target
         if(files && files.length === 1) {
-            setFile(files[0])
+            const targetFile = files[0]
+            if(targetFile.size > FILE_SIZE_LIMIT) {
+                alert("File size is too big!")
+                setFile(null)
+                return
+            }
+
+            setFile(targetFile)
         }
     }
 
