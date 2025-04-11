@@ -1,6 +1,7 @@
 import { Link, Outlet, useNavigate } from 'react-router-dom'
 import { styled } from 'styled-components'
 import { auth } from '../utils/firebase'
+import { LOGOUT_CONFIRM_MESSAGE } from '../constants/message'
 
 const Wrapper = styled.section`
 display: grid;
@@ -43,7 +44,7 @@ svg {
 export const Layout = () => {
   const navigate = useNavigate()
   const onLogOut = async () => {
-    const ok = confirm('Are you sure you want to log out?')
+    const ok = confirm(LOGOUT_CONFIRM_MESSAGE)
     
     if(ok){
       await auth.signOut()

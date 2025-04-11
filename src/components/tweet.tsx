@@ -1,5 +1,10 @@
 import styled from "styled-components"
 import { ITweet } from "../types"
+import { auth, db, storage } from "../utils/firebase"
+import { deleteDoc, doc } from "firebase/firestore"
+import { DB_COLLECTION_PATH } from "../constants"
+import { deleteObject, ref } from "firebase/storage"
+import { DELETE_CONFIRM_MESSAGE } from "../constants/message"
 
 const Wrapper = styled.article`
     display: grid;
@@ -26,12 +31,56 @@ const Payload = styled.p`
     font-size: 18px;
 `
 
-export const Tweet = ({ username, photo, tweet }: ITweet) => {
+const DeleteButton = styled.button`
+    background-color: tomato;
+    color: #fff;
+    font-weight: 600;
+    border: 0;
+    font-size: 12px;
+    padding: 5px 10px;
+    text-transform: uppercase;
+    border-radius: 5px;
+    cursor: pointer;
+
+    &:hover {
+        opacity: 0.8;
+    }
+`
+
+export const Tweet = ({ id, userId, username, photo, tweet }: ITweet) => {
+    const user = auth.currentUser
+    const isSameUser = () => (userId === user?.uid)
+    
+    const onDelete = async () => {
+        if(user?.uid !== userId) {
+            alert("Unauthorised Action!")
+            return
+        }
+
+        const ok = confirm(DELETE_CONFIRM_MESSAGE)
+        if(ok) {
+            try {
+                await deleteDoc(doc(db, DB_COLLECTION_PATH, id))
+
+                if(photo) {
+                    const photoRef = ref(storage, `${DB_COLLECTION_PATH}/${user.uid}-${username}/${id}`)
+                    await deleteObject(photoRef)
+                }
+            } catch (err) {
+                console.error(err)
+            } finally {
+
+            }
+        }
+
+    }
+
   return (
     <Wrapper>
         <Column>
             <Username>{username}</Username>
             <Payload>{tweet}</Payload>
+            {isSameUser() && <DeleteButton onClick={onDelete}>Delete</DeleteButton>}
         </Column>
         <Column>
         {photo && <Photo src={photo} />}
