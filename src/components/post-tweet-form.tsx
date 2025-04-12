@@ -18,7 +18,6 @@ border-radius: 20px;
 font-size: 16px;
 color: white;
 background-color: black;
-width: 100%;
 resize: none;
  font-family: 'system-ui', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 &::placeholder {
