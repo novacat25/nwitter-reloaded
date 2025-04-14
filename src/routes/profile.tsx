@@ -8,6 +8,8 @@ import { updateProfile } from "firebase/auth"
 import { collection, getDocs, limit, orderBy, query, where } from "firebase/firestore"
 import { ITweet } from "../types"
 import { Tweet } from "../components/tweet"
+import { EditIconButton } from "../components/icons/EditIconButton"
+import { CancelIconButton } from "../components/icons/CancelIconButton"
 
 const Wrapper = styled.section`
   display: flex;
@@ -40,6 +42,9 @@ const AvatarInput = styled.input`
 `
 const Name = styled.span`
   font-size: 22px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 `
 
 const Tweets = styled.article`
@@ -48,11 +53,23 @@ const Tweets = styled.article`
   gap: 10px;
 `
 
+const NameInput = styled.input`
+  background-color: #000;
+  border: 1px solid #fff;
+  border-radius: 24px;
+  padding: 4px 8px;
+  color: #fff;
+`
+
 export const Profile = () => {
   const user = auth.currentUser
   const userPhotoURL = user?.photoURL
+  const userDisplayName = user?.displayName || DEFAULT_NICKNAME
+  const [isEditMode, setIsEditMode] = useState(false)
   const [avatar, setAvatar] = useState(userPhotoURL)
   const [tweets, setTweets] = useState<ITweet[]>([])
+  const [editName, setEditName] = useState(userDisplayName)
+  
   const fetchTweets = async () => {
     const tweetsQuery = query(
       collection(db, DB_COLLECTION_PATH),
@@ -71,7 +88,14 @@ export const Profile = () => {
 
   useEffect(() => {
     fetchTweets()
-  }, [tweets])
+  }, [])
+
+  const toggleEditMode = () => (setIsEditMode(prev => !prev))
+
+  const onDisplayNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setEditName(e.target.value)
+  }
+
   const onAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if(!user) return
 
@@ -94,6 +118,41 @@ export const Profile = () => {
       }    
   }
 
+  const onUpdateDisplayName = async () => {
+    if(!user) return
+
+    if(!editName) {
+      setEditName(userDisplayName)
+    }
+    const updateUserNamePayload = { displayName: editName }
+    await updateProfile(user, updateUserNamePayload)
+    setIsEditMode(false)
+  }
+
+  const cancelUpdateDisplayName = () => {
+    setEditName(userDisplayName)
+    setIsEditMode(false)
+  }
+
+  const EditNickname = () => (
+    <Name>
+      <NameInput
+        autoFocus
+        value={editName}
+        onChange={onDisplayNameChange}
+      />
+        <EditIconButton onClick={onUpdateDisplayName} />
+        <CancelIconButton onClick={cancelUpdateDisplayName} />
+    </Name>
+  )
+
+  const DisplayNickname = () => (
+    <Name>
+      {user?.displayName ? user.displayName : DEFAULT_NICKNAME}
+        <EditIconButton onClick={toggleEditMode} />
+    </Name>
+  )
+
   return (
     <Wrapper>
       <AvatarUpload htmlFor="avatar">
@@ -105,9 +164,7 @@ export const Profile = () => {
         accept="image/*" 
         onChange={onAvatarChange} 
       />
-      <Name>
-        {user?.displayName ? user.displayName : DEFAULT_NICKNAME}
-      </Name>
+      {isEditMode ? <EditNickname /> : <DisplayNickname />}
       <Tweets>
         {tweets.map((tweet) => (
           <Tweet key={tweet.id} {...tweet} />
