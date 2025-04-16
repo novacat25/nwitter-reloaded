@@ -65,6 +65,7 @@ export const Profile = () => {
   const user = auth.currentUser
   const userPhotoURL = user?.photoURL
   const userDisplayName = user?.displayName || DEFAULT_NICKNAME
+  const [isLoading, setIsLoading] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
   const [avatar, setAvatar] = useState(userPhotoURL)
   const [tweets, setTweets] = useState<ITweet[]>([])
@@ -97,25 +98,32 @@ export const Profile = () => {
   }
 
   const onAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if(!user) return
+    if(isLoading || !user) return
 
     const { files } = e?.target
     
-    if(files && files.length === 1) {
-      const targetFile = files[0]
-        if(targetFile.size > FILE_SIZE_LIMIT) {
-          alert("File size is too big!")
-          setAvatar(userPhotoURL)
-          return
-        }
-
-        const locationRef = ref(storage, `${AVATAR_IMAGE_PATH}/${user.uid}`)
-        const uploadResult = await uploadBytes(locationRef, targetFile)
-        const avatarUrl = await getDownloadURL(uploadResult.ref)
-        const updatePhotoPayload = { photoURL: avatarUrl }
-        await updateProfile(user, updatePhotoPayload)
-        setAvatar(avatarUrl)
-      }    
+    try {
+      setIsLoading(true)
+      if(files && files.length === 1) {
+        const targetFile = files[0]
+          if(targetFile.size > FILE_SIZE_LIMIT) {
+            alert("File size is too big!")
+            setAvatar(userPhotoURL)
+            return
+          }
+  
+          const locationRef = ref(storage, `${AVATAR_IMAGE_PATH}/${user.uid}`)
+          const uploadResult = await uploadBytes(locationRef, targetFile)
+          const avatarUrl = await getDownloadURL(uploadResult.ref)
+          const updatePhotoPayload = { photoURL: avatarUrl }
+          await updateProfile(user, updatePhotoPayload)
+          setAvatar(avatarUrl)
+      }
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setIsLoading(false)
+    }    
   }
 
   const onUpdateDisplayName = async () => {
