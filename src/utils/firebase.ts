@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app"
 import { getAuth } from "firebase/auth"
-import { getFirestore } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore"
 import { getStorage } from "firebase/storage"
 
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -13,7 +13,7 @@ const firebaseConfig = {
   messagingSenderId: import.meta.env.VITE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_APP_ID,
   measurementId: import.meta.env.VITE_MEASUREMENT_ID
-};
+}
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig)
